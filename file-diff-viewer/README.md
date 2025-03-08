@@ -2,6 +2,8 @@
 
 Upload two files and see the diff between them.
 
+![Demo](./demo.png)
+
 
 ## Tools learnt
 
