@@ -1,25 +1,24 @@
 const jsonrpc = require("jsonrpc-lite");
 
-const requestPayload = jsonrpc.request(1, "greet", ["Bharath"]);
+async function sendRpcRequest(body, skipResponse = false) {
+  const res = await fetch("http://localhost:3000/rpc", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (skipResponse) {
+    return res.status;
+  }
+  return await res.json();
+}
 
-const notificationPayload = jsonrpc.notification("notify", {
-  message: "New package published to AWS CodeArtifact",
-});
+async function test() {
+  console.log("add([5, 3]):", await sendRpcRequest(jsonrpc.request(1, "add", [5, 3])));
+  console.log("greet({ name: 'Alice' }):", await sendRpcRequest(jsonrpc.request(2, "greet", { name: "Alice" })));
+  console.log("notification:", await sendRpcRequest(jsonrpc.notification("notify", {
+    message: "Hello"
+  }), true));
+  console.log("bogus method:", await sendRpcRequest(jsonrpc.request(3, "not-a-method", [5, 3])));
+}
 
-// Sending request
-fetch("http://localhost:3000/rpc", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(requestPayload),
-})
-  .then((res) => res.json())
-  .then(console.log);
-
-// Sending notification
-fetch("http://localhost:3000/rpc", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(notificationPayload),
-})
-  .then((res) => res.text())
-  .then(console.log);
+test();
